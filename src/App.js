@@ -8,8 +8,8 @@ class App extends Component {
     manager: "",
     players: [],
     balance: "",
-    value:'',
-    message:''
+    value: "",
+    message: "",
   };
   async componentDidMount() {
     const manager = await lottery.methods.manager().call();
@@ -18,39 +18,49 @@ class App extends Component {
 
     this.setState({ manager, players, balance });
   }
-  onSubmit = async(event) =>{
+  onSubmit = async (event) => {
     event.preventDefault();
     const accounts = await web3.eth.getAccounts();
-    this.setState({message:'waiting on transaction success..'});
+    this.setState({ message: "waiting on transaction success.." });
     await lottery.methods.enter().send({
-      from:accounts[0],
-      value: web3.utils.toWei( this.state.value,'ether')
-    })
-    this.setState({message:'you are entered into the lottery!'})
+      from: accounts[0],
+      value: web3.utils.toWei(this.state.value, "ether"),
+    });
+    this.setState({ message: "you are entered into the lottery!" });
+  };
+  onClick = async() =>{
+    const accounts = await web3.eth.getAccounts();
+    this.setState({message:'waiting on transaction success..'})
+    await lottery.methods.pickWinner().send({from:accounts[0]});
+    this.setState({message:'A winner has been picked!'});
   }
   render() {
     web3.eth.getAccounts().then(console.log);
     console.log(lottery.options.address);
-    const {manager,players,balance,value,message} = this.state;
+    const { manager, players, balance, value, message } = this.state;
 
     return (
       <div className="App">
         <h2>The lottery contract </h2>
-        <p>This Contract is managed by {manager}.
-            There are currently {players.length} people entered,
-            competing to win {web3.utils.fromWei(balance,'ether')} ether!
+        <p>
+          This Contract is managed by {manager}. There are currently{" "}
+          {players.length} people entered, competing to win{" "}
+          {web3.utils.fromWei(balance, "ether")} ether!
         </p>
-        <hr/>
+        <hr />
         <form onSubmit={this.onSubmit}>
           <h4>Try your luck!</h4>
           <label>Amount of ether</label>
           <input
             value={value}
-            onChange = {event => this.setState({value:event.target.value})}
+            onChange={(event) => this.setState({ value: event.target.value })}
           />
           <button>Enter</button>
         </form>
-        <hr/>
+        <hr />
+        <h4>Ready to pick a winner?</h4>
+        <button onClick={this.onClick}>Pick a Winner!</button>
+        <hr />
         <h1>{message}</h1>
       </div>
     );
